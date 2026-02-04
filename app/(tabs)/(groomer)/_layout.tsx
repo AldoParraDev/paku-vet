@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
+import { Tabs } from "expo-router";
+import { useTheme } from "@/hooks/useTheme";
+import { Icon } from "@/components/common";
 
 export default function GroomerLayout() {
   const { colors } = useTheme();
@@ -19,15 +20,19 @@ export default function GroomerLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
-          tabBarIcon: () => <></>,
+          title: "Inicio",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="appointments"
         options={{
-          title: 'Citas',
-          tabBarIcon: () => <></>,
+          title: "Citas",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="calendar" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

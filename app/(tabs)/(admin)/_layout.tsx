@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
+import { Tabs } from "expo-router";
+import { useTheme } from "@/hooks/useTheme";
+import { Icon } from "@/components/common";
 
 export default function AdminLayout() {
   const { colors } = useTheme();
@@ -19,22 +20,28 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: () => <></>, // Agregar íconos después
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="groomers"
         options={{
-          title: 'Groomers',
-          tabBarIcon: () => <></>,
+          title: "Groomers",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="services" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="clients"
         options={{
-          title: 'Clientes',
-          tabBarIcon: () => <></>,
+          title: "Clientes",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="profile" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

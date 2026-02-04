@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -7,17 +7,19 @@ import {
   TextInputProps,
   TouchableOpacity,
   ViewStyle,
-} from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
-import { BorderRadius, Spacing, Typography } from '@/constants/theme';
+} from "react-native";
+import { useTheme } from "@/hooks/useTheme";
+import { BorderRadius, Spacing, Typography } from "@/constants/theme";
+import { Icon, IconName } from "./Icon";
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: IconName;
+  rightIcon?: IconName;
   containerStyle?: ViewStyle;
-  type?: 'text' | 'password' | 'email' | 'phone';
+  type?: "text" | "password" | "email" | "phone";
+  variant?: "default" | "auth";
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -26,7 +28,8 @@ export const Input: React.FC<InputProps> = ({
   leftIcon,
   rightIcon,
   containerStyle,
-  type = 'text',
+  type = "text",
+  variant = "default",
   ...textInputProps
 }) => {
   const { colors } = useTheme();
@@ -35,12 +38,12 @@ export const Input: React.FC<InputProps> = ({
 
   const getKeyboardType = () => {
     switch (type) {
-      case 'email':
-        return 'email-address';
-      case 'phone':
-        return 'phone-pad';
+      case "email":
+        return "email-address";
+      case "phone":
+        return "phone-pad";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -55,23 +58,25 @@ export const Input: React.FC<InputProps> = ({
       marginBottom: Spacing.xs,
     },
     inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: error
-        ? colors.error
-        : isFocused
-        ? colors.primary
-        : colors.border,
-      borderRadius: BorderRadius.md,
-      backgroundColor: colors.surface,
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: variant === "auth" ? 2 : 1,
+      borderColor:
+        variant === "auth"
+          ? colors.loginInputBorder
+          : error
+            ? colors.error
+            : isFocused
+              ? colors.primary
+              : colors.border,
+      borderRadius: variant === "auth" ? BorderRadius.xl : BorderRadius.md,
+      backgroundColor: variant === "auth" ? colors.loginInput : colors.surface,
       paddingHorizontal: Spacing.md,
     },
     input: {
       flex: 1,
-      paddingVertical: Spacing.md,
       fontSize: Typography.fontSize.md,
-      color: colors.text,
+      color: variant === "auth" ? colors.loginInputText : colors.text,
     },
     iconContainer: {
       marginHorizontal: Spacing.xs,
@@ -88,36 +93,51 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      
+      {label && variant === "default" && (
+        <Text style={styles.label}>{label}</Text>
+      )}
+
       <View style={styles.inputContainer}>
-        {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
-        
+        {leftIcon && (
+          <View style={styles.iconContainer}>
+            <Icon name={leftIcon} size={20} color={colors.textSecondary} />
+          </View>
+        )}
+
         <TextInput
           style={styles.input}
-          placeholderTextColor={colors.placeholder}
+          placeholderTextColor={
+            variant === "auth" ? colors.placeholder : colors.placeholder
+          }
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          secureTextEntry={type === 'password' && !isPasswordVisible}
+          secureTextEntry={type === "password" && !isPasswordVisible}
           keyboardType={getKeyboardType()}
-          autoCapitalize={type === 'email' ? 'none' : 'sentences'}
+          autoCapitalize={type === "email" ? "none" : "sentences"}
           {...textInputProps}
         />
-        
-        {type === 'password' && (
+
+        {type === "password" && (
           <TouchableOpacity
             style={styles.passwordToggle}
             onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={{ color: colors.textSecondary }}>
-              {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
-            </Text>
+            <Icon
+              name={isPasswordVisible ? "eye-open" : "eye-closed"}
+              size={20}
+              color={variant === "auth" ? "#FFFFFF" : colors.textSecondary}
+            />
           </TouchableOpacity>
         )}
-        
-        {rightIcon && <View style={styles.iconContainer}>{rightIcon}</View>}
+
+        {rightIcon && type !== "password" && (
+          <View style={styles.iconContainer}>
+            <Icon name={rightIcon} size={20} color={colors.textSecondary} />
+          </View>
+        )}
       </View>
-      
+
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );

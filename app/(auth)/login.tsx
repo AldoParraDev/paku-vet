@@ -1,21 +1,32 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Screen } from '@/components/layout/Screen';
-import { Input } from '@/components/common/Input';
-import { Button } from '@/components/common/Button';
-import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from '@/hooks/useTheme';
-import { loginSchema, LoginFormData } from '@/utils/validators';
-import { Typography, Spacing } from '@/constants/theme';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Input } from "@/components/common/Input";
+import { Button } from "@/components/common/Button";
+import { Icon } from "@/components/common/Icon";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
+import { loginSchema, LoginFormData } from "@/utils/validators";
+import { Typography, Spacing, BorderRadius } from "@/constants/theme";
+import { SocialButton } from "@/components/auth/SocialButton";
+import { AuthBackground } from "@/components/auth/AuthBackground";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login, error, clearError } = useAuth();
   const { colors } = useTheme();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
@@ -24,8 +35,8 @@ export default function LoginScreen() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -34,9 +45,8 @@ export default function LoginScreen() {
       setIsLoading(true);
       clearError();
       await login(data);
-      // La redirección se maneja en index.tsx
     } catch (err) {
-      console.error('Login error:', err);
+      console.error("Login error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -45,108 +55,227 @@ export default function LoginScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      padding: Spacing.lg,
     },
-    title: {
-      fontSize: Typography.fontSize.xxxl,
-      fontWeight: Typography.fontWeight.bold,
-      color: colors.text,
-      marginBottom: Spacing.xs,
-      textAlign: 'center',
+    safeArea: {
+      flex: 1,
+      paddingHorizontal: Spacing.lg,
     },
-    subtitle: {
-      fontSize: Typography.fontSize.md,
-      color: colors.textSecondary,
-      marginBottom: Spacing.xl,
-      textAlign: 'center',
+    backButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      // marginBottom: Spacing.md,
+      alignSelf: "flex-start",
+      position: "absolute",
+      top: 0,
+      left: Spacing.lg,
+      zIndex: 1,
     },
-    form: {
-      marginTop: Spacing.xl,
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingVertical: Spacing.xl,
     },
-    errorText: {
-      color: colors.error,
-      fontSize: Typography.fontSize.sm,
-      textAlign: 'center',
+    logoContainer: {
+      alignItems: "center",
+      marginBottom: Spacing.lg,
+    },
+    logoRow: {
+      flexDirection: "row",
+      alignItems: "center",
       marginBottom: Spacing.md,
     },
-    footer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: Spacing.lg,
+    logo: {
+      width: 260,
+      height: 160,
+      resizeMode: "contain",
     },
-    footerText: {
-      fontSize: Typography.fontSize.sm,
-      color: colors.textSecondary,
+    logoText: {
+      fontSize: 56,
+      fontWeight: Typography.fontWeight.bold,
+      color: "#FFFFFF",
+      letterSpacing: 2,
     },
-    linkText: {
+    pawPrint: {
+      fontSize: 40,
+      marginLeft: Spacing.sm,
+    },
+
+    tagline: {
+      fontSize: Typography.fontSize.md,
+      color: "#FFFFFF",
+      textAlign: "center",
+      paddingHorizontal: Spacing.xl,
+      lineHeight: 24,
+    },
+    formContainer: {
+      // marginTop: Spacing.xs,
+    },
+    socialContainer: {
+      marginTop: Spacing.xl,
+      gap: Spacing.md,
+    },
+    errorText: {
+      color: "#FFFFFF",
       fontSize: Typography.fontSize.sm,
-      color: colors.primary,
+      textAlign: "center",
+      marginBottom: Spacing.md,
+      backgroundColor: "rgba(255, 22, 55, 0.3)",
+      padding: Spacing.md,
+      borderRadius: BorderRadius.md,
+    },
+    createAccountContainer: {
+      marginTop: Spacing.xl,
+      alignItems: "center",
+      paddingBottom: Spacing.lg,
+    },
+    createAccountText: {
+      fontSize: Typography.fontSize.md,
+      color: "#FFFFFF",
       fontWeight: Typography.fontWeight.semibold,
-      marginLeft: Spacing.xs,
+    },
+    loginButton: {
+      backgroundColor: colors.loginButton,
+      borderRadius: BorderRadius.xl,
+      paddingVertical: Spacing.sm,
+      height: 38,
+    },
+    loginButtonText: {
+      color: colors.loginButtonText,
+      fontSize: Typography.fontSize.md,
+      fontWeight: Typography.fontWeight.semibold,
     },
   });
 
-  return (
-    <Screen scrollable centered>
-      <View style={styles.container}>
-        <Text style={styles.title}>PAKU</Text>
-        <Text style={styles.subtitle}>Bienvenido de vuelta</Text>
-
-        <View style={styles.form}>
-          {error && <Text style={styles.errorText}>{error}</Text>}
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Email"
-                type="email"
-                placeholder="tu@email.com"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.email?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Contraseña"
-                type="password"
-                placeholder="••••••••"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-              />
-            )}
-          />
-
-          <Button
-            title="Iniciar Sesión"
-            onPress={handleSubmit(onSubmit)}
-            loading={isLoading}
-            fullWidth
-            style={{ marginTop: Spacing.md }}
-          />
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>¿No tienes cuenta?</Text>
-          <Text
-            style={styles.linkText}
-            onPress={() => router.push('/(auth)/register')}
+  if (!showForm) {
+    // Pantalla inicial con opciones
+    return (
+      <AuthBackground>
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            style={styles.safeArea}
           >
-            Regístrate
-          </Text>
+            <View style={styles.logoContainer}>
+              <View style={styles.logoRow}>
+                <Image
+                  source={require("@assets/images/logo/logo-mono-dark.png")}
+                  style={styles.logo}
+                />
+              </View>
+              <Text style={styles.tagline}>
+                Todo lo que tu mascota necesita,{"\n"}cuando lo necesita.
+              </Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              <Button
+                title="Ingresar"
+                onPress={() => setShowForm(true)}
+                style={styles.loginButton}
+                textStyle={styles.loginButtonText}
+                fullWidth
+              />
+            </View>
+
+            <View style={styles.socialContainer}>
+              <SocialButton provider="google" onPress={() => {}} disabled />
+              <SocialButton provider="facebook" onPress={() => {}} disabled />
+              <SocialButton provider="apple" onPress={() => {}} disabled />
+            </View>
+
+            <TouchableOpacity
+              style={styles.createAccountContainer}
+              onPress={() => router.push("/(auth)/register")}
+            >
+              <Text style={styles.createAccountText}>Crear cuenta</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </SafeAreaView>
+      </AuthBackground>
+    );
+  }
+
+  // Formulario de login
+  return (
+    <AuthBackground>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <View style={styles.safeArea}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setShowForm(false)}
+          >
+            <Icon name="arrow-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.logoContainer}>
+              <View style={styles.logoRow}>
+                <Image
+                  source={require("@assets/images/logo/logo-mono-dark.png")}
+                  style={styles.logo}
+                />
+              </View>
+              <Text style={styles.tagline}>
+                Todo lo que tu mascota necesita,{"\n"}cuando lo necesita.
+              </Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              {error && <Text style={styles.errorText}>{error}</Text>}
+
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    variant="auth"
+                    type="email"
+                    placeholder="correo@gmail.com"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={errors.email?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    variant="auth"
+                    type="password"
+                    placeholder="contraseña"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={errors.password?.message}
+                  />
+                )}
+              />
+
+              <Button
+                title="Ingresar"
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                style={styles.loginButton}
+                textStyle={styles.loginButtonText}
+                fullWidth
+              />
+            </View>
+          </ScrollView>
         </View>
-      </View>
-    </Screen>
+      </SafeAreaView>
+    </AuthBackground>
   );
 }

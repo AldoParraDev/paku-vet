@@ -46,6 +46,7 @@ code .
 Asegúrate de que existan estos archivos en la raíz del proyecto:
 
 #### `tsconfig.json`
+
 ```json
 {
   "extends": "expo/tsconfig.base",
@@ -67,18 +68,19 @@ Asegúrate de que existan estos archivos en la raíz del proyecto:
 ```
 
 #### `babel.config.js`
+
 ```javascript
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: ["babel-preset-expo"],
     plugins: [
       [
-        'module-resolver',
+        "module-resolver",
         {
-          root: ['./'],
+          root: ["./"],
           alias: {
-            '@': './src',
+            "@": "./src",
           },
         },
       ],
@@ -108,6 +110,7 @@ ls -la src/components/common/
 **Causa**: Los path aliases no están configurados correctamente.
 
 **Solución**:
+
 ```bash
 # Reinstalar dependencias
 npm install
@@ -123,6 +126,7 @@ npm start -- --clear
 **Causa**: Dependencias de Expo no instaladas correctamente.
 
 **Solución**:
+
 ```bash
 # Instalar dependencias de Expo
 npx expo install
@@ -137,6 +141,7 @@ npm install
 **Causa**: Módulo nativo no está instalado.
 
 **Solución**:
+
 ```bash
 npx expo install react-native-safe-area-context react-native-screens
 ```
@@ -172,6 +177,7 @@ npx expo start -c
 ## 🆘 Si nada funciona
 
 1. **Elimina todo y vuelve a empezar**:
+
 ```bash
 rm -rf node_modules package-lock.json
 npm install
@@ -179,12 +185,14 @@ npx expo start -c
 ```
 
 2. **Verifica versiones**:
+
 ```bash
 node --version  # Debe ser >= 18
 npm --version   # Debe ser >= 9
 ```
 
 3. **Actualiza Expo CLI**:
+
 ```bash
 npm install -g expo-cli@latest
 ```
