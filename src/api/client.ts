@@ -1,18 +1,20 @@
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { CONFIG } from '@/constants/config';
-import { storage } from '@/utils/storage';
-import { AuthTokens } from '@/types/auth.types';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { CONFIG } from "@/constants/config";
+import { storage } from "@/utils/storage";
+import { LoginResponse } from "@/types/auth.types";
 
-// Crear instancia de axios
 const apiClient: AxiosInstance = axios.create({
   baseURL: CONFIG.API_URL,
   timeout: CONFIG.API_TIMEOUT,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// Flag para evitar múltiples intentos de refresh
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;
@@ -30,26 +32,32 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Interceptor de request para agregar token
+// Interceptor de request
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Obtener token del storage
-    const accessToken = await storage.getItem<string>(
-      CONFIG.STORAGE_KEYS.ACCESS_TOKEN
-    );
+    const isAuthEndpoint =
+      config.url?.includes("/auth/login") ||
+      config.url?.includes("/auth/register") ||
+      config.url?.includes("/auth/refresh");
 
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (!isAuthEndpoint) {
+      const accessToken = await storage.getItem<string>(
+        CONFIG.STORAGE_KEYS.ACCESS_TOKEN,
+      );
+
+      if (accessToken && config.headers) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
     }
 
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
-// Interceptor de response para manejar errores y refresh token
+// Interceptor de response
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -57,10 +65,18 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Si es error 401 y no hemos intentado hacer refresh
+    // No intentar refresh en endpoints de auth
+    const isAuthEndpoint =
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/register") ||
+      originalRequest.url?.includes("/auth/refresh");
+
+    if (isAuthEndpoint) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Si ya se está refrescando, agregar a la cola
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -80,41 +96,37 @@ apiClient.interceptors.response.use(
 
       try {
         const refreshToken = await storage.getItem<string>(
-          CONFIG.STORAGE_KEYS.REFRESH_TOKEN
+          CONFIG.STORAGE_KEYS.REFRESH_TOKEN,
         );
 
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          throw new Error("No refresh token available");
         }
 
         // Llamar al endpoint de refresh
-        const response = await axios.post<{ tokens: AuthTokens }>(
+        const response = await axios.post<LoginResponse>(
           `${CONFIG.API_URL}/auth/refresh`,
-          { refreshToken }
+          { refresh_token: refreshToken },
         );
 
-        const { accessToken, refreshToken: newRefreshToken } =
-          response.data.tokens;
+        const { access_token, refresh_token: newRefreshToken } = response.data;
 
         // Guardar nuevos tokens
-        await storage.setItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+        await storage.setItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN, access_token);
         await storage.setItem(
           CONFIG.STORAGE_KEYS.REFRESH_TOKEN,
-          newRefreshToken
+          newRefreshToken,
         );
 
-        // Procesar cola de peticiones
-        processQueue(null, accessToken);
+        processQueue(null, access_token);
 
-        // Reintentar la petición original
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
         }
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
-        
-        // Limpiar storage si el refresh falla
+
         await storage.removeItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
         await storage.removeItem(CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
         await storage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
@@ -126,7 +138,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

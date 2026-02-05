@@ -1,8 +1,13 @@
-import { create } from 'zustand';
-import { User, AuthTokens, LoginCredentials, RegisterData } from '@/types/auth.types';
-import { authService } from '@/api/services/auth.service';
-import { storage } from '@/utils/storage';
-import { CONFIG } from '@/constants/config';
+import { create } from "zustand";
+import {
+  User,
+  AuthTokens,
+  LoginCredentials,
+  RegisterData,
+} from "@/types/auth.types";
+import { authService } from "@/api/services/auth.service";
+import { storage } from "@/utils/storage";
+import { CONFIG } from "@/constants/config";
 
 interface AuthState {
   user: User | null;
@@ -11,7 +16,6 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
@@ -31,30 +35,43 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const response = await authService.login(credentials);
+      // Login y obtener tokens
+      const loginResponse = await authService.login(credentials);
 
-      // Guardar tokens y usuario en storage
+      console.log("login response::", loginResponse);
+
+      // Guardar tokens
       await storage.setItem(
         CONFIG.STORAGE_KEYS.ACCESS_TOKEN,
-        response.tokens.accessToken
+        loginResponse.access_token,
       );
       await storage.setItem(
         CONFIG.STORAGE_KEYS.REFRESH_TOKEN,
-        response.tokens.refreshToken
+        loginResponse.refresh_token,
       );
-      await storage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, response.user);
+
+      // Obtener datos del usuario
+      const user = await authService.getCurrentUser();
+
+      // Guardar usuario
+      await storage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, user);
 
       set({
-        user: response.user,
-        tokens: response.tokens,
+        user,
+        tokens: {
+          access_token: loginResponse.access_token,
+          refresh_token: loginResponse.refresh_token,
+          token_type: loginResponse.token_type,
+        },
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error: any) {
       const errorMessage =
+        error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        'Error al iniciar sesión';
+        "Error al iniciar sesión";
       set({
         error: errorMessage,
         isLoading: false,
@@ -68,30 +85,42 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const response = await authService.register(data);
+      // Registrar usuario
+      const user = await authService.register(data);
 
-      // Guardar tokens y usuario en storage
+      // Hacer login automáticamente después del registro
+      const loginResponse = await authService.login({
+        email: data.email,
+        password: data.password,
+      });
+
+      // Guardar tokens
       await storage.setItem(
         CONFIG.STORAGE_KEYS.ACCESS_TOKEN,
-        response.tokens.accessToken
+        loginResponse.access_token,
       );
       await storage.setItem(
         CONFIG.STORAGE_KEYS.REFRESH_TOKEN,
-        response.tokens.refreshToken
+        loginResponse.refresh_token,
       );
-      await storage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, response.user);
+      await storage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, user);
 
       set({
-        user: response.user,
-        tokens: response.tokens,
+        user,
+        tokens: {
+          access_token: loginResponse.access_token,
+          refresh_token: loginResponse.refresh_token,
+          token_type: loginResponse.token_type,
+        },
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error: any) {
       const errorMessage =
+        error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        'Error al registrarse';
+        "Error al registrarse";
       set({
         error: errorMessage,
         isLoading: false,
@@ -103,12 +132,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      // Intentar cerrar sesión en el servidor
-      await authService.logout();
-    } catch (error) {
-      console.error('Error al cerrar sesión en el servidor:', error);
-    } finally {
-      // Limpiar storage y estado local
       await storage.removeItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
       await storage.removeItem(CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
       await storage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
@@ -120,6 +143,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
         error: null,
       });
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
   },
 
@@ -136,12 +161,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (accessToken && refreshToken && userData) {
         set({
           user: userData,
-          tokens: { accessToken, refreshToken },
+          tokens: {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            token_type: "bearer",
+          },
           isAuthenticated: true,
         });
       }
     } catch (error) {
-      console.error('Error loading stored auth:', error);
+      console.error("Error loading stored auth:", error);
     } finally {
       set({ isLoading: false });
     }

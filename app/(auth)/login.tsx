@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -28,10 +33,13 @@ export default function LoginScreen() {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const passwordInputRef = useRef<TextInput>(null);
+
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -41,15 +49,24 @@ export default function LoginScreen() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    console.log(data);
+
     try {
       setIsLoading(true);
       clearError();
       await login(data);
     } catch (err) {
-      console.error("Login error:", err);
+      console.log("Login error:", err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoBack = () => {
+    setShowForm(false);
+    clearError();
+    reset(); // Limpiar el formulario y errores
+    Keyboard.dismiss(); // Cerrar teclado
   };
 
   const styles = StyleSheet.create({
@@ -123,7 +140,7 @@ export default function LoginScreen() {
       fontSize: Typography.fontSize.sm,
       textAlign: "center",
       marginBottom: Spacing.md,
-      backgroundColor: "rgba(255, 22, 55, 0.3)",
+      backgroundColor: colors.error,
       padding: Spacing.md,
       borderRadius: BorderRadius.md,
     },
@@ -147,6 +164,9 @@ export default function LoginScreen() {
       color: colors.loginButtonText,
       fontSize: Typography.fontSize.md,
       fontWeight: Typography.fontWeight.semibold,
+    },
+    keyboardAvoid: {
+      flex: 1,
     },
   });
 
@@ -204,77 +224,90 @@ export default function LoginScreen() {
   return (
     <AuthBackground>
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <View style={styles.safeArea}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => setShowForm(false)}
-          >
-            <Icon name="arrow-back" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoid}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.safeArea}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={handleGoBack}
+              >
+                <Icon name="arrow-back" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
 
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.logoContainer}>
-              <View style={styles.logoRow}>
-                <Image
-                  source={require("@assets/images/logo/logo-mono-dark.png")}
-                  style={styles.logo}
-                />
-              </View>
-              <Text style={styles.tagline}>
-                Todo lo que tu mascota necesita,{"\n"}cuando lo necesita.
-              </Text>
-            </View>
+              <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View style={styles.logoContainer}>
+                  <View style={styles.logoRow}>
+                    <Image
+                      source={require("@assets/images/logo/logo-mono-dark.png")}
+                      style={styles.logo}
+                    />
+                  </View>
+                  <Text style={styles.tagline}>
+                    Todo lo que tu mascota necesita,{"\n"}cuando lo necesita.
+                  </Text>
+                </View>
 
-            <View style={styles.formContainer}>
-              {error && <Text style={styles.errorText}>{error}</Text>}
+                <View style={styles.formContainer}>
+                  {error && <Text style={styles.errorText}>{error}</Text>}
 
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    variant="auth"
-                    type="email"
-                    placeholder="correo@gmail.com"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.email?.message}
+                  <Controller
+                    control={control}
+                    name="email"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input
+                        variant="auth"
+                        type="email"
+                        placeholder="correo@gmail.com"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        error={errors.email?.message}
+                        returnKeyType="next"
+                        onSubmitEditing={() =>
+                          passwordInputRef.current?.focus()
+                        }
+                      />
+                    )}
                   />
-                )}
-              />
 
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    variant="auth"
-                    type="password"
-                    placeholder="contraseña"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.password?.message}
+                  <Controller
+                    control={control}
+                    name="password"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input
+                        variant="auth"
+                        type="password"
+                        placeholder="contraseña"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        error={errors.password?.message}
+                        returnKeyType="done"
+                      />
+                    )}
                   />
-                )}
-              />
 
-              <Button
-                title="Ingresar"
-                onPress={handleSubmit(onSubmit)}
-                loading={isLoading}
-                style={styles.loginButton}
-                textStyle={styles.loginButtonText}
-                fullWidth
-              />
+                  <Button
+                    title="Ingresar"
+                    onPress={handleSubmit(onSubmit)}
+                    loading={isLoading}
+                    style={styles.loginButton}
+                    textStyle={styles.loginButtonText}
+                    fullWidth
+                  />
+                </View>
+              </ScrollView>
             </View>
-          </ScrollView>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </AuthBackground>
   );

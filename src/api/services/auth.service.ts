@@ -1,61 +1,52 @@
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../endpoints';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../endpoints";
 import {
   LoginCredentials,
   RegisterData,
-  AuthResponse,
+  LoginResponse,
+  RegisterResponse,
   User,
-} from '@/types/auth.types';
-import { ApiResponse } from '@/types/api.types';
+} from "@/types/auth.types";
 
 export const authService = {
   /**
    * Inicia sesión con email y contraseña
    */
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>(
+  async login(credentials: LoginCredentials): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>(
       API_ENDPOINTS.AUTH.LOGIN,
-      credentials
+      credentials,
     );
-    return response.data.data;
+    return response.data;
   },
 
   /**
    * Registra un nuevo usuario
    */
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>(
+  async register(data: RegisterData): Promise<RegisterResponse> {
+    const response = await apiClient.post<RegisterResponse>(
       API_ENDPOINTS.AUTH.REGISTER,
-      data
+      data,
     );
-    return response.data.data;
+    return response.data;
   },
 
   /**
    * Refresca el token de acceso
    */
-  async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>(
+  async refreshToken(refreshToken: string): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>(
       API_ENDPOINTS.AUTH.REFRESH,
-      { refreshToken }
+      { refresh_token: refreshToken },
     );
-    return response.data.data;
-  },
-
-  /**
-   * Cierra sesión
-   */
-  async logout(): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
+    return response.data;
   },
 
   /**
    * Obtiene información del usuario autenticado
    */
   async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<ApiResponse<User>>(
-      API_ENDPOINTS.AUTH.ME
-    );
-    return response.data.data;
+    const response = await apiClient.get<User>(API_ENDPOINTS.USERS.ME);
+    return response.data;
   },
 };

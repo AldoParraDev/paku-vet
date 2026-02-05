@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "@react-native-community/datetimepicker",
+    [
+      "expo-location",
+      {
+        "locationAlwaysAndWhenInUsePermission": "Permitir que $(PRODUCT_NAME) use tu ubicación."
+      }
+    ]
+  ]
+}

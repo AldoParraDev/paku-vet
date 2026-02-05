@@ -19,7 +19,7 @@ interface InputProps extends TextInputProps {
   rightIcon?: IconName;
   containerStyle?: ViewStyle;
   type?: "text" | "password" | "email" | "phone";
-  variant?: "default" | "auth";
+  variant?: "default" | "auth" | "register";
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -60,7 +60,7 @@ export const Input: React.FC<InputProps> = ({
     inputContainer: {
       flexDirection: "row",
       alignItems: "center",
-      borderWidth: variant === "auth" ? 2 : 1,
+      borderWidth: variant === "auth" ? 1 : 1,
       borderColor:
         variant === "auth"
           ? colors.loginInputBorder
@@ -126,7 +126,13 @@ export const Input: React.FC<InputProps> = ({
             <Icon
               name={isPasswordVisible ? "eye-open" : "eye-closed"}
               size={20}
-              color={variant === "auth" ? "#FFFFFF" : colors.textSecondary}
+              color={
+                variant === "auth"
+                  ? "#FFFFFF"
+                  : variant === "register"
+                    ? colors.primary + "80"
+                    : colors.textSecondary
+              }
             />
           </TouchableOpacity>
         )}
