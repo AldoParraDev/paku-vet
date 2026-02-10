@@ -16,8 +16,8 @@ export default function UserLayout() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
+          // borderTopColor: colors.border,
+          // borderTopWidth: 1,
           height: 60 + insets.bottom, // Altura de la tab bar
           paddingBottom: insets.bottom, // Padding inferior
           paddingTop: 8, // Padding superior

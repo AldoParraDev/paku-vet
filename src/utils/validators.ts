@@ -31,5 +31,16 @@ export const registerSchema = z
     path: ["confirmPassword"],
   });
 
+export const addAddressStep1Schema = z.object({
+  district_id: z.string().min(1, "Selecciona un distrito"),
+  address_line: z
+    .string()
+    .min(3, "La dirección debe tener al menos 3 caracteres"),
+  building_number: z.string().min(1, "El número es requerido"),
+  apartment_number: z.string().optional(),
+});
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
+
+export type AddAddressStep1FormData = z.infer<typeof addAddressStep1Schema>;

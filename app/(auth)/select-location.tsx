@@ -137,7 +137,7 @@ export default function SelectLocationScreen() {
         1000,
       );
     } catch (error) {
-      console.error("Error getting location:", error);
+      console.log("Error getting location:", error);
       setLocation({
         latitude: defaultLocation.latitude,
         longitude: defaultLocation.longitude,
@@ -175,7 +175,7 @@ export default function SelectLocationScreen() {
 
       return "Dirección no disponible";
     } catch (error) {
-      console.error("Error getting address:", error);
+      console.log("Error getting address:", error);
       return "Dirección no disponible";
     } finally {
       setLoadingAddress(false);
@@ -208,7 +208,7 @@ export default function SelectLocationScreen() {
       const data = await response.json();
       setSearchResults(data || []);
     } catch (error) {
-      console.error("Error searching:", error);
+      console.log("Error searching:", error);
     } finally {
       setSearching(false);
     }
@@ -242,8 +242,6 @@ export default function SelectLocationScreen() {
   const handleMapPress = async (event: any) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     const address = await getAddressFromCoordinates(latitude, longitude);
-
-    console.log(address, latitude, longitude);
 
     setLocation({
       latitude,

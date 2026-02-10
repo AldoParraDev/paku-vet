@@ -20,7 +20,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
-  const { isAuthenticated, isLoading, loadStoredAuth, user } = useAuthStore();
+  const { isAuthenticated, isLoading, loadStoredAuth, user, error } =
+    useAuthStore();
   const [appIsReady, setAppIsReady] = useState(false);
 
   const [fontsLoaded] = useFonts({
@@ -51,6 +52,11 @@ export default function RootLayout() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === "(auth)";
+
+    // NO redirigir si hay un error (el usuario está intentando loguearse)
+    if (error) {
+      return;
+    }
 
     if (!isAuthenticated && !inAuthGroup) {
       // No autenticado y no está en auth -> ir a login

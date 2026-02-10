@@ -9,4 +9,6 @@ export { SuccessModal } from "./SuccessModal";
 export { AvatarPicker } from "./AvatarPicker";
 export { GenderSelector } from "./GenderSelector";
 export { DatePicker } from "./DatePicker";
+export { Text } from "./Text";
+export { Picker } from "./Picker";
 export type { IconName } from "./Icon";

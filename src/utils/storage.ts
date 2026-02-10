@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const storage = {
   /**
@@ -9,7 +9,7 @@ export const storage = {
       const jsonValue = JSON.stringify(value);
       await AsyncStorage.setItem(key, jsonValue);
     } catch (error) {
-      console.error(`Error saving ${key}:`, error);
+      console.log(`Error saving ${key}:`, error);
       throw error;
     }
   },
@@ -22,7 +22,7 @@ export const storage = {
       const jsonValue = await AsyncStorage.getItem(key);
       return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (error) {
-      console.error(`Error getting ${key}:`, error);
+      console.log(`Error getting ${key}:`, error);
       return null;
     }
   },
@@ -34,7 +34,7 @@ export const storage = {
     try {
       await AsyncStorage.removeItem(key);
     } catch (error) {
-      console.error(`Error removing ${key}:`, error);
+      console.log(`Error removing ${key}:`, error);
       throw error;
     }
   },
@@ -46,7 +46,7 @@ export const storage = {
     try {
       await AsyncStorage.clear();
     } catch (error) {
-      console.error('Error clearing storage:', error);
+      console.log("Error clearing storage:", error);
       throw error;
     }
   },
@@ -58,7 +58,7 @@ export const storage = {
     try {
       const values = await AsyncStorage.multiGet(keys);
       const result: Record<string, any> = {};
-      
+
       values.forEach(([key, value]) => {
         if (value) {
           try {
@@ -68,10 +68,10 @@ export const storage = {
           }
         }
       });
-      
+
       return result;
     } catch (error) {
-      console.error('Error getting multiple items:', error);
+      console.log("Error getting multiple items:", error);
       return {};
     }
   },

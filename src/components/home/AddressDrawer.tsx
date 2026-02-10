@@ -6,6 +6,7 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { Icon } from "@/components/common/Icon";
 import { Button } from "@/components/common/Button";
@@ -25,6 +26,7 @@ interface AddressDrawerProps {
   addresses: Address[];
   onSelectAddress: (id: string) => void;
   onAddNew: () => void;
+  isLoading?: boolean;
 }
 
 export const AddressDrawer: React.FC<AddressDrawerProps> = ({
@@ -33,6 +35,7 @@ export const AddressDrawer: React.FC<AddressDrawerProps> = ({
   addresses,
   onSelectAddress,
   onAddNew,
+  isLoading = false,
 }) => {
   const { colors } = useTheme();
 
@@ -93,59 +96,104 @@ export const AddressDrawer: React.FC<AddressDrawerProps> = ({
       paddingHorizontal: Spacing.lg,
       paddingTop: Spacing.md,
     },
+    loadingContainer: {
+      padding: Spacing.xl,
+      alignItems: "center",
+    },
+    emptyContainer: {
+      padding: Spacing.xl,
+      alignItems: "center",
+    },
+    emptyIcon: {
+      marginBottom: Spacing.md,
+    },
+    emptyText: {
+      fontSize: Typography.fontSize.md,
+      fontFamily: Typography.fontFamily.regular,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginBottom: Spacing.lg,
+    },
   });
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      );
+    }
+
+    if (addresses.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Icon
+            name="gps"
+            size={48}
+            color={colors.textSecondary}
+            style={styles.emptyIcon}
+          />
+          <Text variant="regular" style={styles.emptyText}>
+            No tienes direcciones guardadas.{"\n"}
+            Agrega una para continuar.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={addresses}
+        keyExtractor={(item) => item.id}
+        style={styles.addressList}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.addressItem}
+            onPress={() => {
+              onSelectAddress(item.id);
+              onClose();
+            }}
+          >
+            <Icon
+              name="gps"
+              size={20}
+              color={item.isDefault ? colors.primary : colors.textSecondary}
+            />
+            <Text variant="regular" style={styles.addressText}>
+              {item.address}
+            </Text>
+            {item.isDefault && (
+              <Icon
+                name="check"
+                size={20}
+                color={colors.primary}
+                style={styles.checkIcon}
+              />
+            )}
+          </TouchableOpacity>
+        )}
+      />
+    );
+  };
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType="slide"
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable onPress={(e) => e.stopPropagation()}>
           <View style={styles.drawer}>
-            {/* <View style={styles.handle} /> */}
-
             <View style={styles.header}>
               <Text variant="bold" style={styles.title}>
                 Elige tu dirección
               </Text>
             </View>
 
-            <FlatList
-              data={addresses}
-              keyExtractor={(item) => item.id}
-              style={styles.addressList}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.addressItem}
-                  onPress={() => {
-                    onSelectAddress(item.id);
-                    onClose();
-                  }}
-                >
-                  <Icon
-                    name="gps"
-                    size={20}
-                    color={
-                      item.isDefault ? colors.primary : colors.textSecondary
-                    }
-                  />
-                  <Text variant="regular" style={styles.addressText}>
-                    {item.address}
-                  </Text>
-                  {item.isDefault && (
-                    <Icon
-                      name="check"
-                      size={20}
-                      color={colors.primary}
-                      style={styles.checkIcon}
-                    />
-                  )}
-                </TouchableOpacity>
-              )}
-            />
+            {renderContent()}
 
             <View style={styles.buttonContainer}>
               <Button

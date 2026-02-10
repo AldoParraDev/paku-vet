@@ -98,6 +98,7 @@ npm run ios      # Para iOS
 ### Para cada nueva funcionalidad sigue este orden:
 
 #### 1. Define Tipos
+
 ```typescript
 // src/types/[feature].types.ts
 export interface Pet {
@@ -108,15 +109,17 @@ export interface Pet {
 ```
 
 #### 2. Crea el Servicio API
+
 ```typescript
 // src/api/services/[feature].service.ts
 export const petService = {
-  getAll: () => apiClient.get('/pets'),
+  getAll: () => apiClient.get("/pets"),
   // ...
-}
+};
 ```
 
 #### 3. Crea el Store (si es necesario)
+
 ```typescript
 // src/store/[feature]Store.ts
 export const usePetStore = create((set) => ({
@@ -126,20 +129,23 @@ export const usePetStore = create((set) => ({
 ```
 
 #### 4. Crea Custom Hook
+
 ```typescript
 // src/hooks/use[Feature].ts
 export const usePets = () => {
   // Lógica reutilizable
-}
+};
 ```
 
 #### 5. Crea Componentes
+
 ```typescript
 // src/components/[feature]/
 // Componentes específicos de la funcionalidad
 ```
 
 #### 6. Implementa la Pantalla
+
 ```typescript
 // app/(tabs)/([role])/[screen].tsx
 // Usa todo lo anterior
@@ -148,35 +154,41 @@ export const usePets = () => {
 ## 🔄 Iteración Recomendada
 
 ### Fase 1: Login/Register (ACTUAL)
+
 - ✅ Estructura base
 - 🔲 Diseño de Figma
 - 🔲 Estilos finales
 - 🔲 Validaciones completas
 
 ### Fase 2: Dashboard por Rol
+
 - 🔲 Vista de admin
 - 🔲 Vista de groomer
 - 🔲 Vista de user/cliente
 
 ### Fase 3: Módulo de Mascotas (User)
+
 - 🔲 Listar mascotas
 - 🔲 Agregar mascota
 - 🔲 Editar mascota
 - 🔲 Eliminar mascota
 
 ### Fase 4: Módulo de Citas
+
 - 🔲 Agendar cita (user)
 - 🔲 Ver citas (user)
 - 🔲 Gestionar citas (groomer)
 - 🔲 Dashboard de citas (admin)
 
 ### Fase 5: Módulo de Groomers (Admin)
+
 - 🔲 Listar groomers
 - 🔲 Agregar groomer
 - 🔲 Editar groomer
 - 🔲 Ver disponibilidad
 
 ### Fase 6: Módulo de Clientes (Admin)
+
 - 🔲 Listar clientes
 - 🔲 Ver perfil
 - 🔲 Ver mascotas del cliente
@@ -200,6 +212,7 @@ Cuando desarrolles una pantalla nueva:
 ## 🎯 Puntos Importantes
 
 ### Mantén el Código Limpio
+
 - Usa los componentes reutilizables
 - Sigue la estructura de carpetas
 - Tipea todo con TypeScript
@@ -207,16 +220,18 @@ Cuando desarrolles una pantalla nueva:
 - Mantén funciones pequeñas
 
 ### Manejo de Errores
+
 ```typescript
 try {
   await someOperation();
 } catch (error) {
-  console.error('Error:', error);
+  console.log("Error:", error);
   // Mostrar error al usuario
 }
 ```
 
 ### Loading States
+
 ```typescript
 const [isLoading, setIsLoading] = useState(false);
 
@@ -262,6 +277,7 @@ const handleSubmit = async () => {
 5. **Datos**: Estructura de los datos
 
 ### Ejemplo:
+
 ```
 Quiero implementar el módulo de mascotas para usuarios.
 - Debe mostrar lista de mascotas

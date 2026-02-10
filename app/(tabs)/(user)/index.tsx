@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -15,55 +15,64 @@ import { ServiceCard } from "@/components/home/ServiceCard";
 import { OfferCard } from "@/components/home/OfferCard";
 import { AddressDrawer } from "@/components/home/AddressDrawer";
 import { Text } from "@/components/common/Text";
+import { useAddressStore } from "@/store/addressStore";
 
 export default function UserHomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const user = useAuthStore((state) => state.user);
 
-  const insets = useSafeAreaInsets();
+  // Address store
+  const { addresses, isLoading, fetchAddresses, setDefaultAddress } =
+    useAddressStore();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState("1");
+  const [refreshing, setRefreshing] = useState(false);
 
   // Mock de direcciones - Esto vendrá de tu API
-  const addresses = [
-    {
-      id: "1",
-      address: "Jr. Parque del bosque 500",
-      isDefault: selectedAddressId === "1",
-    },
-    {
-      id: "2",
-      address: "Av. Principal 123, San Isidro",
-      isDefault: selectedAddressId === "2",
-    },
-  ];
+  // Cargar direcciones al montar el componente
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
-  const selectedAddress = addresses.find(
-    (addr) => addr.id === selectedAddressId,
-  );
+  const loadAddresses = async () => {
+    try {
+      await fetchAddresses();
+    } catch (error) {
+      console.log("Error loading addresses:", error);
+    }
+  };
 
-  const handleSelectAddress = (id: string) => {
-    setSelectedAddressId(id);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAddresses();
+    setRefreshing(false);
+  };
+
+  // Obtener dirección por defecto
+  const defaultAddress = addresses.find((addr) => addr.is_default);
+
+  const handleSelectAddress = async (id: string) => {
+    try {
+      await setDefaultAddress(id);
+    } catch (error) {
+      console.log("Error setting default address:", error);
+    }
   };
 
   const handleAddNewAddress = () => {
-    router.push("/(auth)/select-location");
+    router.push("/(screens)/add-address");
   };
 
   const handleRegisterPet = () => {
-    // Navegar al formulario de registro de mascota
     console.log("Register pet");
   };
 
   const handleServicePress = () => {
-    // Navegar a detalle de servicio
     console.log("Service pressed");
   };
 
   const handleOfferPress = () => {
-    // Navegar a detalle de oferta
     console.log("Offer pressed");
   };
 
@@ -78,6 +87,7 @@ export default function UserHomeScreen() {
     sectionTitle: {
       fontSize: Typography.fontSize.md,
       color: colors.primary,
+      marginBottom: Spacing.sm,
     },
     sectionMargin: {
       marginBottom: Spacing.xl,
@@ -90,12 +100,26 @@ export default function UserHomeScreen() {
       {/* Header fijo */}
       <HomeHeader
         userName={user?.first_name || "Usuario"}
-        address={selectedAddress?.address || "Selecciona una dirección"}
+        address={
+          defaultAddress?.address_line
+            ? `${defaultAddress.address_line} ${defaultAddress.building_number}`
+            : "Agrega una dirección"
+        }
         onAddressPress={() => setDrawerVisible(true)}
       />
 
       {/* Contenido scrolleable */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
+        }
+      >
         {/* Banner principal */}
         <BannerCard
           title="Grooming sin estrés"
@@ -133,9 +157,16 @@ export default function UserHomeScreen() {
       <AddressDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        addresses={addresses}
+        addresses={addresses.map((addr) => ({
+          id: addr.id,
+          address: `${addr.address_line} ${addr.building_number}${
+            addr.apartment_number ? `, ${addr.apartment_number}` : ""
+          }`,
+          isDefault: addr.is_default,
+        }))}
         onSelectAddress={handleSelectAddress}
         onAddNew={handleAddNewAddress}
+        isLoading={isLoading}
       />
     </SafeAreaView>
   );

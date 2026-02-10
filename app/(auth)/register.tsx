@@ -83,7 +83,6 @@ export default function RegisterScreen() {
         locationData.latitude &&
         locationData.longitude
       ) {
-        console.log("Location data received:", locationData);
         setValue("address_line", locationData.address);
         setLocationCoords({
           lat: locationData.latitude,
@@ -123,14 +122,12 @@ export default function RegisterScreen() {
         profile_photo_url: profileImage || undefined,
       };
 
-      console.log("Submitting registration:", registerData);
-
       await register(registerData);
 
       clearLocation();
       setShowSuccessModal(true);
     } catch (err) {
-      console.error("Register error:", err);
+      console.log("Register error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -457,7 +454,7 @@ export default function RegisterScreen() {
         buttonText="Ir al inicio"
         onButtonPress={() => {
           setShowSuccessModal(false);
-          router.replace("/(auth)/login");
+          router.replace("/(auth)/login-form");
         }}
       />
     </SafeAreaView>

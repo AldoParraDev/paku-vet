@@ -39,6 +39,7 @@ apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const isAuthEndpoint =
       config.url?.includes("/auth/login") ||
+      config.url?.includes("/auth/login-form") ||
       config.url?.includes("/auth/register") ||
       config.url?.includes("/auth/refresh");
 
@@ -66,8 +67,8 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    console.error("Response error:", error.message); // Log
-    console.error("Error details:", error.response?.data); // Log
+    console.log("Response error:", error.message); // Log
+    console.log("Error details:", error.response?.data); // Log
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
@@ -75,6 +76,7 @@ apiClient.interceptors.response.use(
     // No intentar refresh en endpoints de auth
     const isAuthEndpoint =
       originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/login-form") ||
       originalRequest.url?.includes("/auth/register") ||
       originalRequest.url?.includes("/auth/refresh");
 

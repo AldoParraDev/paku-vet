@@ -70,7 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       console.log("Auth state updated successfully");
     } catch (error: any) {
-      console.error("Login error in store:", error);
+      console.log("Login error in store:", error);
       const errorMessage =
         error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -148,7 +148,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.log("Error al cerrar sesión:", error);
     }
   },
 
@@ -174,7 +174,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
       }
     } catch (error) {
-      console.error("Error loading stored auth:", error);
+      console.log("Error loading stored auth:", error);
     } finally {
       set({ isLoading: false });
     }

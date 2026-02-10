@@ -12,6 +12,20 @@ export const API_ENDPOINTS = {
     UPDATE_ME: "/users/me",
   },
 
+  // Direcciones
+  ADDRESSES: {
+    LIST: "/addresses",
+    CREATE: "/addresses",
+    DETAIL: (id: string) => `/addresses/${id}`,
+    UPDATE: (id: string) => `/addresses/${id}`,
+    DELETE: (id: string) => `/addresses/${id}`,
+  },
+
+  // Geografía
+  GEO: {
+    DISTRICTS: "/geo/districts",
+  },
+
   // Administrador
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
