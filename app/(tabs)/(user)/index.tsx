@@ -16,6 +16,8 @@ import { OfferCard } from "@/components/home/OfferCard";
 import { AddressDrawer } from "@/components/home/AddressDrawer";
 import { Text } from "@/components/common/Text";
 import { useAddressStore } from "@/store/addressStore";
+import { usePetStore } from "@/store/petStore";
+import { PetsList } from "@/components/home/PetsList";
 
 export default function UserHomeScreen() {
   const router = useRouter();
@@ -26,14 +28,20 @@ export default function UserHomeScreen() {
   const { addresses, isLoading, fetchAddresses, setDefaultAddress } =
     useAddressStore();
 
+  // Pet store
+  const { pets, isLoading: loadingPets, fetchPets } = usePetStore();
+
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock de direcciones - Esto vendrá de tu API
-  // Cargar direcciones al montar el componente
+  // Cargar datos al montar
   useEffect(() => {
-    loadAddresses();
+    loadInitialData();
   }, []);
+
+  const loadInitialData = async () => {
+    await Promise.all([fetchAddresses(), fetchPets()]);
+  };
 
   const loadAddresses = async () => {
     try {
@@ -65,7 +73,13 @@ export default function UserHomeScreen() {
   };
 
   const handleRegisterPet = () => {
-    console.log("Register pet");
+    router.push("/(screens)/add-pet-step1");
+  };
+
+  const handlePetPress = (pet: any) => {
+    console.log("Pet pressed:", pet);
+    // TODO: Navegar a detalle de mascota
+    // router.push(`/(screens)/pet-detail/${pet.id}`);
   };
 
   const handleServicePress = () => {
@@ -126,9 +140,17 @@ export default function UserHomeScreen() {
           subtitle="Elige el PAKU Spa ideal para tu mascota."
         />
 
-        {/* Registrar mascota */}
+        {/* Mascotas */}
         <View style={styles.sectionMargin}>
-          <RegisterPetCard onPress={handleRegisterPet} />
+          {pets.length === 0 ? (
+            <RegisterPetCard onPress={handleRegisterPet} />
+          ) : (
+            <PetsList
+              pets={pets}
+              onPetPress={handlePetPress}
+              onAddPress={handleRegisterPet}
+            />
+          )}
         </View>
 
         {/* Servicios */}

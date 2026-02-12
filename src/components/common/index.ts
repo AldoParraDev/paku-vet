@@ -11,4 +11,6 @@ export { GenderSelector } from "./GenderSelector";
 export { DatePicker } from "./DatePicker";
 export { Text } from "./Text";
 export { Picker } from "./Picker";
+export { OptionSelector } from "./OptionSelector";
+export { YesNoSelector } from "./YesNoSelector";
 export type { IconName } from "./Icon";
