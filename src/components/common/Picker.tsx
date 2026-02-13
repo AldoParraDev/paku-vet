@@ -232,7 +232,7 @@ export const Picker: React.FC<PickerProps> = ({
                 >
                   <RNPicker.Item
                     label={placeholder}
-                    value=""
+                    value={placeholder}
                     color={colors.placeholder}
                   />
                   {options.map((option) => (

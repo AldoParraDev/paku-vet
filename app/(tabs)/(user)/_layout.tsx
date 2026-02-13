@@ -95,6 +95,48 @@ export default function UserLayout() {
           href: null, // Esto la oculta del tab bar
         }}
       />
+      <Tabs.Screen
+        name="preferences"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="payments"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="support"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="legal"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="complaints"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="select-pet"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="service-details"
+        options={{
+          href: null, // Esto la oculta del tab bar
+        }}
+      />
     </Tabs>
   );
 }

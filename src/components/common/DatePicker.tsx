@@ -19,6 +19,8 @@ interface DatePickerProps {
   onChange: (date: Date) => void;
   error?: string;
   placeholder?: string;
+  paddingVertical?: number;
+  fontWeight?: any;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -27,6 +29,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   error,
   placeholder = "Selecciona una fecha",
+  paddingVertical,
+  fontWeight,
 }) => {
   const { colors } = useTheme();
   const [show, setShow] = useState(false);
@@ -54,10 +58,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       marginBottom: Spacing.md,
     },
     label: {
-      fontSize: Typography.fontSize.md,
+      // fontSize: Typography.fontSize.md,
       color: colors.primary,
       marginBottom: Spacing.xs,
-      fontWeight: Typography.fontWeight.semibold,
+      fontWeight: fontWeight || Typography.fontWeight.semibold,
+      fontSize: Typography.fontSize.sm,
+      fontFamily: Typography.fontFamily.medium,
     },
     inputContainer: {
       flexDirection: "row",
@@ -67,7 +73,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       borderRadius: BorderRadius.md,
       backgroundColor: colors.surface,
       paddingHorizontal: Spacing.md,
-      paddingVertical: 12,
+      paddingVertical: paddingVertical || 12,
     },
     dateText: {
       flex: 1,

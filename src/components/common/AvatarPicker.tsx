@@ -9,11 +9,13 @@ import { Spacing, Shadows } from "@/constants/theme";
 interface AvatarPickerProps {
   imageUri: string | null;
   onImageSelected: (uri: string) => void;
+  size?: number;
 }
 
 export const AvatarPicker: React.FC<AvatarPickerProps> = ({
   imageUri,
   onImageSelected,
+  size,
 }) => {
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
@@ -72,8 +74,8 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
       marginVertical: Spacing.md,
     },
     avatarContainer: {
-      width: 120,
-      height: 120,
+      width: size || 120,
+      height: size || 120,
       borderRadius: 60,
       backgroundColor: "#BFD0FE",
       alignItems: "center",

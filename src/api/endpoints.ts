@@ -36,6 +36,11 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/pets/${id}`,
   },
 
+  // Catálogo
+  CATALOG: {
+    BREEDS: "/catalog/breeds",
+  },
+
   // Administrador
   ADMIN: {
     DASHBOARD: "/admin/dashboard",

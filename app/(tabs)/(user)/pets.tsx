@@ -114,6 +114,7 @@ export default function PetsScreen() {
     petImage: {
       width: "100%",
       height: "100%",
+      resizeMode: "center",
     },
     petPlaceholder: {
       width: "100%",
@@ -126,7 +127,8 @@ export default function PetsScreen() {
       fontSize: 64,
     },
     petInfo: {
-      padding: Spacing.md,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
       position: "absolute",
       bottom: 0,
       left: 0,
@@ -137,7 +139,7 @@ export default function PetsScreen() {
       justifyContent: "flex-end",
     },
     petName: {
-      fontSize: Typography.fontSize.lg,
+      fontSize: Typography.fontSize.xl,
       fontFamily: Typography.fontFamily.bold,
       color: colors.surface,
     },
@@ -145,7 +147,7 @@ export default function PetsScreen() {
       fontSize: Typography.fontSize.md,
       fontFamily: Typography.fontFamily.regular,
       color: colors.surface,
-      lineHeight: 18,
+      lineHeight: 20,
       marginBottom: Spacing.xs,
     },
     emptyContainer: {
@@ -204,7 +206,7 @@ export default function PetsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.push("/(tabs)/(user)")}
         >
           <Icon name="arrow-back" size={20} color="#FFFFFF" />
         </TouchableOpacity>

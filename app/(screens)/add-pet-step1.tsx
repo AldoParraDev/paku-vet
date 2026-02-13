@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -22,10 +23,12 @@ import { AvatarPicker } from "@/components/common/AvatarPicker";
 import { OptionSelector } from "@/components/common/OptionSelector";
 import { YesNoSelector } from "@/components/common/YesNoSelector";
 import { DatePicker } from "@/components/common/DatePicker";
+import { Picker } from "@/components/common/Picker";
 import { useTheme } from "@/hooks/useTheme";
 import { petStep1Schema, PetStep1FormData } from "@/utils/validators";
 import { Typography, Spacing } from "@/constants/theme";
 import { useAddPetStore } from "@/store/addPetStore";
+import { useCatalogStore } from "@/store/catalogStore";
 
 export default function AddPetStep1Screen() {
   const router = useRouter();
@@ -34,11 +37,20 @@ export default function AddPetStep1Screen() {
 
   const insets = useSafeAreaInsets();
 
+  // Catalog store
+  const {
+    dogBreeds,
+    catBreeds,
+    isLoading: loadingBreeds,
+    fetchBreeds,
+  } = useCatalogStore();
+
   const [photoUri, setPhotoUri] = useState<string | undefined>(
     formData.photo_url,
   );
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(
+    formData.birth_date ? new Date(formData.birth_date) : null,
+  );
 
   const {
     control,
@@ -61,6 +73,20 @@ export default function AddPetStep1Screen() {
 
   const species = watch("species");
 
+  // Cargar razas cuando cambia la especie
+  useEffect(() => {
+    if (species && (species === "dog" || species === "cat")) {
+      fetchBreeds(species);
+    }
+  }, [species]);
+
+  // Limpiar raza seleccionada cuando cambia la especie
+  useEffect(() => {
+    if (species) {
+      setValue("breed", "");
+    }
+  }, [species]);
+
   const onContinue = (data: PetStep1FormData) => {
     // Guardar datos en el store
     formData.setStep1Data({
@@ -76,6 +102,10 @@ export default function AddPetStep1Screen() {
     formData.clearForm();
     router.replace("/(tabs)/(user)");
   };
+
+  // Obtener las razas según la especie seleccionada
+  const availableBreeds =
+    species === "dog" ? dogBreeds : species === "cat" ? catBreeds : [];
 
   const styles = StyleSheet.create({
     container: {
@@ -128,6 +158,16 @@ export default function AddPetStep1Screen() {
     avatarContainer: {
       alignItems: "center",
       marginBottom: Spacing.xl,
+    },
+    loadingContainer: {
+      padding: Spacing.md,
+      alignItems: "center",
+    },
+    loadingText: {
+      marginTop: Spacing.sm,
+      fontSize: Typography.fontSize.sm,
+      fontFamily: Typography.fontFamily.regular,
+      color: colors.textSecondary,
     },
     fixedButton: {
       position: "absolute",
@@ -194,7 +234,6 @@ export default function AddPetStep1Screen() {
                 onBlur={onBlur}
                 error={errors.name?.message}
                 returnKeyType="next"
-                colorLabel={colors.primary}
               />
             )}
           />
@@ -217,23 +256,35 @@ export default function AddPetStep1Screen() {
             )}
           />
 
-          {/* Raza */}
-          <Controller
-            control={control}
-            name="breed"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Raza"
-                placeholder="Especificar raza"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.breed?.message}
-                returnKeyType="next"
-                colorLabel={colors.primary}
-              />
-            )}
-          />
+          {/* Raza - Solo mostrar si hay especie seleccionada */}
+          {species && (
+            <>
+              {loadingBreeds ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color={colors.primary} />
+                  <Text style={styles.loadingText}>Cargando razas...</Text>
+                </View>
+              ) : (
+                <Controller
+                  control={control}
+                  name="breed"
+                  render={({ field: { onChange, value } }) => (
+                    <Picker
+                      label="Raza"
+                      value={value}
+                      options={availableBreeds.map((b) => ({
+                        id: b.id,
+                        name: b.name,
+                      }))}
+                      placeholder="Selecciona una raza"
+                      onSelect={onChange}
+                      error={errors.breed?.message}
+                    />
+                  )}
+                />
+              )}
+            </>
+          )}
 
           {/* Sexo */}
           <Controller

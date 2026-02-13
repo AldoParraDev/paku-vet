@@ -48,7 +48,7 @@ export const petStep1Schema = z.object({
   species: z.enum(["dog", "cat"], {
     errorMap: () => ({ message: "Selecciona una especie" }),
   }),
-  breed: z.string().min(2, "La raza debe tener al menos 2 caracteres"),
+  breed: z.string().min(1, "Selecciona una raza"),
   sex: z.enum(["male", "female"], {
     errorMap: () => ({ message: "Selecciona el sexo" }),
   }),
